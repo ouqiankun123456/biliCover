@@ -1,0 +1,18 @@
+spring:
+  profiles:
+    active: pro
+        
+    
+#公共配置与profiles选择无关
+mybatis:
+  typeAliasesPackage: com.bilibiliCover.generator.entity
+  mapperLocations: classpath:mapper/*.xml
+  
+pagehelper:
+    helperDialect: mysql
+    reasonable: true
+    supportMethodsArguments: true
+    params: count=countSql
+    
+
+
