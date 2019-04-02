@@ -38,7 +38,15 @@
         </div>
       </div>
     </div>
-
+    <div class="tabbar">
+      <p class="tabbar-title">选择制定图片进行编辑</p>
+      <div class="tabbar-tab">
+        <div class="tabbar-tab__item" v-for="(tabItem, index) of tabData" :key="index">
+          <div></div>
+          <div>{{ tabItem.paramName }}</div>
+        </div>
+      </div>
+    </div>
     <!-- 上传图片 -->
     <el-dialog
       top="136px"
@@ -89,8 +97,9 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import { VueCropper } from 'vue-cropper'
+import { blobToDataUrl } from '@/assets/js/utils'
 export default {
   components: {
     VueCropper
@@ -124,9 +133,12 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'previewImage',
+      'tabData'
+    ]),
     ...mapState([
-      'cropperFormData',
-      'previewImage'
+      'cropperFormData'
     ]),
     filterObject () {
       return {
@@ -171,8 +183,7 @@ export default {
       link.click()
     },
     uploadChange (file, fileList) {
-      console.log(file, fileList)
-      this.blobToDataURL(file.raw, dataUrl => {
+      blobToDataUrl(file.raw, dataUrl => {
         this.option.img = dataUrl
       })
     },
@@ -180,12 +191,7 @@ export default {
       this.dialogVisible = true
     },
     prevStep () {
-      this.$router.push('/makeCover/secondHandle')
-    },
-    blobToDataURL(blob, callback) {
-      let a = new FileReader()
-      a.onload = function (e) { callback(e.target.result) }
-      a.readAsDataURL(blob)
+      this.$router.go(-1)
     },
     dataURLtoFile(dataurl, filename) { // 将base64转换为文件
       var arr = dataurl.split(','); var mime = arr[0].match(/:(.*?);/)[1]
@@ -245,6 +251,11 @@ export default {
       })
     }
   },
+  watch: {
+    previewImage (newImage) {
+      this.previewSrc = newImage
+    }
+  },
   created () {
     this.previewSrc = this.previewImage
   }
@@ -252,9 +263,16 @@ export default {
 </script>
 <style lang="less" scoped>
 .firstHandle {
+  padding-bottom: 36px + 90px + 20px;
+  background-color: rgb(245, 245, 245);
   .editor {
     width: 960px + 64px + 340px;
     margin: 0 auto;
+    &::after {
+      content: '';
+      display: table;
+      clear: both;
+    }
     &-preview {
       width: 960px;
       float: left;
@@ -332,6 +350,44 @@ export default {
     }
     .upload-cropper {
       height: 400px;
+    }
+  }
+  .tabbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    &-title {
+      height: 36px;
+      line-height: 1;
+      font-size:12px;
+      color: #003333;
+      text-indent: 1em;
+      margin: 0;
+    }
+    &-tab {
+      height: 90px;
+      display: flex;
+      &__item {
+        margin-left: 12px;
+        div:first-child {
+          border: 1px solid #ccc;
+          width: 80px;
+          height: 50px;
+        }
+        div:last-child {
+          border-left: 1px solid #ccc;
+          border-right: 1px solid #ccc;
+          border-bottom: 1px solid #ccc;
+          width: 80px;
+          height: 20px;
+          text-align: center;
+          color: rgb(153, 153, 153);
+          font-size: 12px;
+          line-height: 16px;
+        }
+      }
     }
   }
 }

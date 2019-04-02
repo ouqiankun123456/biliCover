@@ -5,11 +5,13 @@ import store from './store'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import '@/assets/css/base.less'
-import axios from 'axios'
+import http from '@/api'
+
 Vue.use(ElementUI)
 Vue.config.productionTip = false
-Vue.prototype.$axios = axios
+Vue.prototype.$http = http
 Vue.prototype.$bus = new Vue()
+
 new Vue({
   router,
   store,

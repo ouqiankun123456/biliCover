@@ -3,7 +3,7 @@
     <div class="editor">
       <div class="editor-preview">
         <div class="editor-preview__title">
-          <h1>已选模板：国服最强狄仁杰</h1>
+          <h1>已选模板：{{ templateName }}</h1>
           <h4>上传自己的图片素材，在建议区域进行构图或许效果更好哦~</h4>
         </div>
         <div class="editor-preview__img">
@@ -18,11 +18,11 @@
           <div class="editor-form__item" v-if="item.paramType === 'input'">
             <span class="editor-form__item--title">{{ item.paramName }}</span>
             <!-- <span class="editor-form__item--suggestion">建议5-7个字</span> -->
-            <el-input class="editor-form__item--input" v-model="formData[item.paramName]" @change="coverGenerator"></el-input>
+            <el-input class="editor-form__item--input" v-model="formData[item.paramName]" @blur="generateCover"></el-input>
           </div>
         </div>
         <div>
-          <el-button class="btn-default prev-btn">上一步</el-button>
+          <el-button class="btn-default prev-btn" @click="prevStep">上一步</el-button>
           <el-button type="danger" class="btn-default next-btn" @click="nextStep">下一步</el-button>
         </div>
       </div>
@@ -33,87 +33,67 @@
 <script>
 import { mapMutations } from 'vuex'
 export default {
+  props: ['templateKid', 'templateName'],
   data() {
     return {
-      activeNames: ['1'],
-      // 对比度
-      contrast: 50,
-      // 亮度
-      brightness: 50,
-      // 颜色饱和度
-      saturation: 50,
-
       formItem: [],
-
       formData: {},
-
       coverImageSrc: ''
     }
   },
   methods: {
     ...mapMutations([
+      'setFormItem',
       'setCropperFormData',
       'setPreviewImage'
     ]),
+    prevStep () {
+      this.$router.go(-1)
+    },
     nextStep () {
       this.$router.push('/makeCover/firstHandle')
     },
-    coverGenerator () {
-      let { templateKid } = this.$route.params
-      let data = {
-        templateKid: templateKid,
-        data: {
-          ...this.formData,
-          '图片1': ''
-        },
-        printSize: 'bilibili'
-      }
-      this.setCropperFormData(data)
-      this.$axios.post('proxyUrl/coverGenerator', data).then(res => {
-        this.coverImageSrc = 'proxyUrl/temp' + res.data.result
+    async bootstrap () {
+      // 获取表单
+      let formItem = await this.getFormItem()
+      // 保存到vuex, 下一个页面会用到
+      this.setFormItem(formItem)
+      this.formItem.push(...formItem)
+      // 设置表单的默认值
+      formItem.forEach(({ paramName, defaultValue }) => { this.$set(this.formData, paramName, defaultValue) })
+      // 生成封面
+      this.generateCover()
+    },
+    getFormItem () {
+      return this.$http.get({
+        url: 'coverGenerator',
+        params: [this.templateKid]
+      })
+    },
+    generateCover () {
+      this.$http.post({
+        url: '/coverGenerator',
+        filterNull: false,
+        params: {
+          printSize: 'bilibili',
+          templateKid: this.templateKid,
+          data: this.formData
+        }
+      }).then(res => {
+        this.coverImageSrc = this.$http.baseUrl + res
         this.setPreviewImage(this.coverImageSrc)
+        this.setCropperFormData(this.formData)
       })
     }
   },
-  mounted() {
-    let { templateKid } = this.$route.params
-    // 获取要填写的表单
-    this.$axios.get('proxyUrl/coverGenerator/' + templateKid)
-      .then(res => {
-        this.formItem = res.data.result
-        res.data.result.forEach(item => {
-          if (item.paramType === 'input') {
-            this.$set(this.formData, item.paramName, '')
-          }
-        })
-      })
-
-    this.$axios.post('proxyUrl/coverGenerator', {
-      templateKid: templateKid,
-      data: {
-        '标题内容1': '国服最强狄仁杰',
-        '标题内容2': '为无辜者代言',
-        '图片1': ''
-      },
-      printSize: 'bilibili'
-    }).then(res => {
-      this.$axios.get('proxyUrl/io/download', {
-        responseType: 'blob',
-        params: {
-          name: res.data.result,
-          type: 'temp'
-        }
-      }).then(res => {
-        let blob = new Blob([res.data], { type: `${res.data.type}` })
-        this.coverImageSrc = URL.createObjectURL(blob)
-        this.setPreviewImage(this.coverImageSrc)
-      })
-    })
+  created () {
+    this.bootstrap()
   }
 }
 </script>
 <style lang="less" scoped>
 .firstHandle {
+  background-color: rgb(245, 245, 245);
   .editor {
     width: 960px + 64px + 340px;
     margin: 0 auto;

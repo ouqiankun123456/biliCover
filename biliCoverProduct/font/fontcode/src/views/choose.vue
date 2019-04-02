@@ -23,7 +23,6 @@ export default {
   },
   data() {
     return {
-      message: 'choose',
       items: []
     }
   },
@@ -32,63 +31,29 @@ export default {
       this.$router.push({
         name: 'secondHandle',
         params: {
+          templateName: item.templateName,
           templateKid: item.kid
         }
       })
     },
     getData() {
-      this.items = []
-      let _this = this;
-      this.$axios
-        .get('proxyUrl/cover', {
-          params: {
-            templateName: this.$store.state.searchName,
-            templateType: this.$store.state.searchType === '全部' ? '' : this.$store.state.searchType
-          }
+      this.$http.get({
+        url: '/cover',
+        params: {
+          templateName: this.$store.state.searchName,
+          templateType: this.$store.state.searchType === '全部' ? '' : this.$store.state.searchType
+        }
+      }).then(result => {
+        this.items = result.map(item => {
+          item.imgSrc = this.$http.baseUrl + item.previewImage
+          return item
         })
-        .then(response => {
-          this.items = response.data.result.map(item => {
-            // item.imgSrc = 'http://238o4s4873.zicp.vip:57014/' + item.previewImage
-            item.imgSrc = 'proxyUrl' + item.previewImage
-            return item
-          })
-          // this.items = response.data.result
-          // this.getImages()
-        })
-        .catch(function(error) {
-          console.log(error)
-        })
-    },
-    getImage(name, index) {
-      this.$axios
-        .get('proxyUrl/io/download', {
-          responseType: 'blob',
-          params: {
-            name: name,
-            type: 'uploadFile'
-          }
-        })
-        .then(response => {
-          let bold = new Blob([response.data], { type: `${response.data.type}` })
-          this.$set(this.items[index], 'imgSrc', URL.createObjectURL(bold))
-        })
-        .catch(function(error) {
-          console.log(error)
-        })
-    },
-    getImages() {
-      this.items.map((currentValue, index, arr) => {
-        this.getImage(currentValue.previewImage, index)
       })
-      console.log(this.items)
     }
   },
   mounted() {
-    console.log('choose', this.message)
-    console.log(this.$bus.$emit)
     this.$bus.$on('needSearch', this.getData)
     this.getData()
-    // setInterval(this.testAddData, 2000)
   }
 }
 </script>
@@ -100,6 +65,7 @@ export default {
   flex-direction: column;
   padding-right: 278px;
   padding-left: 278px;
+  background-color: rgb(245, 245, 245);
   &__title {
     margin-top: 100px;
     font-size: 60px;
@@ -119,11 +85,6 @@ export default {
     grid-column-gap: 15px;
     grid-row-gap: 60px;
     justify-items: stretch;
-    // .view {
-    //   &:not(:nth-child(1)) {
-    //     margin-left: 16px;
-    //   }
-    // }
   }
 }
 </style>

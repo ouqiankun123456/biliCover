@@ -54,8 +54,9 @@ export default new Router({
           component: () => import(/* webpackChunkName: "firstHandle" */ './views/firstHandle.vue')
         },
         {
-          path: 'secondHandle',
+          path: 'secondHandle/:templateKid',
           name: 'secondHandle',
+          props: true,
           component: () => import(/* webpackChunkName: "secondHandle" */ './views/secondHandle.vue')
         }
       ]
