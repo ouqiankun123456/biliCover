@@ -71,7 +71,7 @@
                 ref="uploadImage"
                 class="upload-demo"
                 :data="{uploadPath: 'uploadFile'}"
-                action="proxyUrl/io/chunkUpload"
+                :action="$http.baseUrl + '/io/chunkUpload'"
                 :file-list="chosenType['data'][key][`fileList`]"
                 :limit="1"
                 :before-remove="beforeRemove(key)"
@@ -232,8 +232,8 @@ export default {
         if (!that.chosenType.data[key].defaultValue) {
           return
         }
-        that.$axios
-          .delete('proxyUrl/io', {
+        that.$http
+          .delete({ url: that.$http.baseUrl + '/io',
             params: {
               delKids: that.chosenType.data[key].defaultValue
             }
@@ -314,7 +314,7 @@ export default {
     },
     handlePreviewLayersObj(obj) {
       let coverCodeObj = []
-      let coverTemplateParams = []
+      // let coverTemplateParams = []
       // eslint-disable-next-line
       for (let [index, value] of obj.entries()) {
         let tempalteObj = {}
@@ -387,8 +387,8 @@ export default {
       console.log(this.layers)
       console.log(this.handleResultLayersObj(this.layers))
       let submitObj = this.handleResultLayersObj(this.layers)
-      this.$axios
-        .post('proxyUrl/cover', submitObj)
+      this.$http
+        .post({ url: this.$http.baseUrl + '/cover', data: submitObj })
         .then(response => {
           console.log(response)
         })
@@ -398,11 +398,11 @@ export default {
     },
     setPreview() {
       let that = this
-      this.$axios
-        .put('proxyUrl/cover/previewImage', { previewImage: this.previewImageUrl })
+      this.$http
+        .put({ url: that.$http.baseUrl + '/cover/previewImage', data: { previewImage: this.previewImageUrl } })
         .then(response => {
           console.log(response)
-          that.nowImgSrc = 'proxyUrl' + response.data.result
+          that.nowImgSrc = that.$http.baseUrl + response.data.result
           // that.$set(that, 'showImgSrc', 'proxyUrl' + response.data.result)
         })
         .catch(function(error) {
@@ -412,8 +412,8 @@ export default {
     preview() {
       let submitObj = this.handlePreviewLayersObj(this.layers)
       let that = this
-      this.$axios
-        .post('proxyUrl/cover/preview', {templateCode: submitObj.templateCode})
+      this.$http
+        .post({ url: that.$http.baseUrl + '/cover/preview', data: { templateCode: submitObj.templateCode } })
         .then(response => {
           that.previewImageUrl = response.data.result
           that.showImgSrc = 'proxyUrl/temp/预览.png'
