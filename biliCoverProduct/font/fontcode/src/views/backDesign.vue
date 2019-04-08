@@ -232,12 +232,11 @@ export default {
         if (!that.chosenType.data[key].defaultValue) {
           return
         }
-        that.$http
-          .delete({ url: that.$http.baseUrl + '/io',
-            params: {
-              delKids: that.chosenType.data[key].defaultValue
-            }
-          })
+        that.$http.delete({ url: that.$http.baseUrl + '/io',
+          params: {
+            delKids: that.chosenType.data[key].defaultValue
+          }
+        })
           .then(response => {
             console.log(response)
           })
