@@ -12,7 +12,6 @@ function getBaseUrl() {
   if (process.env.NODE_ENV === 'development') {
     return 'proxyUrl'
   } else {
-    // return 'http://120.79.0.225/back'
     return location.host + '/back'
   }
 }
