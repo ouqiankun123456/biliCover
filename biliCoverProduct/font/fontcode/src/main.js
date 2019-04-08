@@ -3,7 +3,9 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
+// import 'element-ui/lib/theme-chalk/index.css'
+// 使用自定义颜色主题
+import './assets/theme/index.css'
 import '@/assets/css/base.less'
 import http from '@/api'
 
