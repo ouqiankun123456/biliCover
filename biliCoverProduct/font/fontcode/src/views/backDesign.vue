@@ -16,7 +16,7 @@
     </div>
     <div class="backDesign__content">
       <div class="backDesign__content__left">
-        <el-popover
+        <!-- <el-popover
           v-for="(layer, index) in layers" :key="layer.name + index"
           placement="right-start"
           trigger="hover">
@@ -27,20 +27,32 @@
           <div slot="reference">
             <span :class="{ 'backDesign__content__left__spot': true, 'hover__spot': index === chosenIndex}">&#8226;</span>
             <div :class="{ 'backDesign__content__left__layer': true, 'hover__layer': index === chosenIndex}" @click="selectLayer(index)">{{layer.title}}</div>
+            <el-button type="info" icon="el-icon-plus" size="mini" @click="addLayer(index)"></el-button>
+            <el-button type="info" icon="el-icon-minus" size="mini" @click="deleteLayer(index)" v-if="layers.length !==1"></el-button>
             <div class="layer-line" v-if="index !== layers.length - 1"></div>
           </div>
-        </el-popover>
+        </el-popover> -->
+        <div v-for="(layer, index) in layers" :key="layer.name + index">
+            <span :class="{ 'backDesign__content__left__spot': true, 'hover__spot': index === chosenIndex}">&#8226;</span>
+            <div :class="{ 'backDesign__content__left__layer': true, 'hover__layer': index === chosenIndex}" @click="selectLayer(index)">{{layer.title}}</div>
+            <!-- <el-button type="info" icon="el-icon-plus" size="mini" @click="addLayer(index)"></el-button> -->
+            <!-- <el-button type="info" icon="el-icon-minus" size="mini" @click="deleteLayer(index)" v-if="layers.length !==1"></el-button> -->
+            <i class="el-icon-plus" @click="addLayer(index)" v-if="chosenIndex === index"></i>
+            <i class="el-icon-minus" @click="deleteLayer(index)" v-if="layers.length !==1 && chosenIndex === index"></i>
+            <div class="layer-line" v-if="index !== layers.length - 1"></div>
+          </div>
       </div>
       <div class="backDesign__content__middle">
         <div class="backDesign__content__middle__showImageButtons">
           <el-button type="text" @click="toggle" :class="{ showImageButton: true, activeShowImageButton: nowImage === '实时效果'}">实时效果</el-button>
+          <div style="width:0px;height:13px;border:1px solid rgba(153,153,153,1);opacity:1;margin-left:10px;margin-right:10px"></div>
           <el-button type="text" @click="toggle" :class="{ showImageButton: true, activeShowImageButton: nowImage === '展示效果'}">展示效果</el-button>
         </div>
-        <img v-if="nowImage === '实时效果'" :src="nowImgSrc" />
-        <img v-if="nowImage === '展示效果'" :src="showImgSrc" />
+        <img class="showimage" v-if="nowImage === '实时效果'" :src="nowImgSrc" />
+        <img class="showimage" v-if="nowImage === '展示效果'" :src="showImgSrc" />
         <div class="backDesign__content__middle__saveButtons">
-          <el-button @click="save">保存</el-button>
-          <el-button @click="setPreview">设为预览效果</el-button>
+          <el-button @click="save" class="savebutton">保存</el-button>
+          <el-button @click="setPreview" class="previewbutton">设为预览效果</el-button>
         </div>
       </div>
       <div class="backDesign__content__right">
@@ -50,15 +62,19 @@
             <el-input v-model="chosenType.title"></el-input>
           </div>
           <div class="backDesign__content__right__inputarea__item" v-for="(value, key) in chosenType.data" :key="key">
-            <el-popover
+            <!-- <el-popover
               v-if="isModifyParameter"
               placement="right"
               title="填写变量名字"
               trigger="hover">
               <el-input v-model="chosenType.data[key].paramName" required></el-input>
-               <el-checkbox slot="reference" v-model="chosenType.data[key].isDynamic"><span :class="{'input__title': true, 'dynamic__prop': chosenType.data[key].isDynamic}">{{key}}</span></el-checkbox>
-            </el-popover>
-            <span v-else :class="{'input__title': true, 'dynamic__prop': chosenType.data[key].isDynamic}">{{key}}</span>
+               <el-checkbox slot="reference" v-model="chosenType.data[key].isDynamic"><span :class="{'input__title': true, 'dynamic__prop': chosenType.data[key].isDynamic && chosenType.data[key].paramName.trim()}">{{key}}</span></el-checkbox>
+            </el-popover> -->
+            <div v-if="isModifyParameter" class="prop__title">
+              <el-checkbox v-model="chosenType.data[key].isDynamic"><span :class="{'input__title': true, 'dynamic__prop': chosenType.data[key].isDynamic && chosenType.data[key].paramName.trim()}">{{key}}</span></el-checkbox>
+              <el-input class="propname__input" v-if="chosenType.data[key].isDynamic" v-model="chosenType.data[key].paramName" required placeholder="请填写变量名称"></el-input>
+            </div>
+            <span v-else :class="{'input__title': true, 'dynamic__prop': chosenType.data[key].isDynamic && chosenType.data[key].paramName.trim()}">{{key}}</span>
             <template v-if="chosenType.data[key].inputType === 'input'" >
               <el-input v-model="chosenType.data[key].defaultValue"></el-input>
             </template>
@@ -80,7 +96,7 @@
                 :auto-upload="true"
                 :on-exceed="handleExceed"
                 list-type="picture">
-                <el-button size="small" type="primary" slot="trigger">选择图片</el-button>
+                <el-button size="small" icon="el-icon-circle-plus-outline" class="upload-image-button" slot="trigger">选择图片</el-button>
               </el-upload>
             </template>
             <template v-if="chosenType.data[key].inputType === 'color'" >
@@ -104,7 +120,7 @@
             <el-input v-model="introduce[key]"></el-input>
           </div>
         </div>
-        <el-button @click="saveLayer">保存</el-button>
+        <el-button class="layer-save-button" @click="saveLayer">确定</el-button>
       </div>
     </div>
   </div>
@@ -147,9 +163,9 @@ export default {
           name: '文字',
           type: 'text',
           data: {
-            verticalText: 'false', // 是否垂直文字
+            verticalText: false, // 是否垂直文字
             fontName: '田氏颜体大字库', // 字体名
-            fontStyle: '2', // 字体样式
+            fontStyle: 0, // 字体样式
             fontSize: '100', // 字体尺寸
             textColor: 'rgba(0, 0, 0, 1)', // 字体颜色，格式例子rgba(19, 206, 102, 0.8)
             borderColor: 'rgba(0, 0, 0, 0)', // 描边颜色，格式例子rgba(19, 206, 102, 0.8)
@@ -512,7 +528,7 @@ export default {
       &__spot {
         margin-left: 23px;
         color: #999999;
-        font-size: 14pt
+        font-size: 14px
       }
       .hover__spot {
         color: #333333
@@ -521,7 +537,7 @@ export default {
         margin-left: 5px;
         color: #999999;
         display: inline-block;
-        font-size: 14pt;
+        font-size: 14px;
       }
       .hover__layer {
         color: #333333
@@ -538,16 +554,43 @@ export default {
     &__middle {
       width: calc(100% - 400px);
       height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
 
       background-color: #E4E4E4;
       &__showImageButtons {
         display: flex;
         flex-wrap: nowrap;
+        align-items: center;
+        margin-top: 80px;
+        margin-bottom: 20px;
         .showImageButton {
           color: #333333;
         }
         .activeShowImageButton {
           color: #999999;
+        }
+      }
+      .showimage {
+        width: 960px;
+        height: 600px;
+        background:rgba(255,255,255,1);
+        opacity:1;
+      }
+      &__saveButtons {
+        margin-top: 30px;
+        .savebutton {
+          width: 180px;
+          height: 50px;
+          background-color:  #000000;
+          color: #FFFFFF;
+        }
+        .previewbutton {
+          width: 180px;
+          height: 50px;
+          background-color:  #FF5050;
+          color: #FFFFFF;
         }
       }
     }
@@ -557,21 +600,84 @@ export default {
       display: flex;
       flex-direction: column;
       background-color: #F5F5F5;
+      position: relative;
+      box-sizing: border-box;
+      &__inputarea {
+        padding: 0 20px;
+        overflow: auto;
+        height: calc(100% - 40px);
+        &__name {
+          /deep/.el-input__inner {
+            background-color: #F5F5F5;
+            border-radius: 0;
+            border-right: 0;
+            border-left: 0;
+            border-top: 0;
+            text-align: left;
+            padding-left: 0;
+          }
+        }
+        &__item {
+          display: flex;
+          flex-direction: column;
+          .el-input-number {
+            width: 100%;
+          }
+          /deep/.el-input__inner {
+            background-color: #F5F5F5;
+            border-radius: 0;
+            border-right: 0;
+            border-left: 0;
+            border-top: 0;
+            text-align: left;
+            padding-left: 0;
+          }
+
+        }
+      }
+      .layer-save-button {
+        position: absolute;
+        width: 100%;
+        bottom: 0;
+        right: 0;
+        color: #FFFFFF;
+        background:rgba(0,0,0,1);
+      }
     }
   }
 }
 .input__title {
   display: block;
-  font-size: 12pt;
+  font-size: 12px;
   color: #999999;
-  margin-left: 20px;
+  // margin-left: 20px;
   margin-top: 15px;
+  height: 16px;
 }
 .dynamic__prop {
   color: red;
 }
 .input__content {
   // display: inline-block;
-  margin-left: 20px;
+  // margin-left: 20px;
+}
+// 上传按钮
+/deep/.upload-demo .el-upload {
+  width: 100%
+}
+.upload-image-button {
+  width: 100%;
+  background: rgba(245,245,245,1);
+}
+/deep/.prop__title {
+  display: flex;
+  flex-wrap: nowrap;
+  .propname__input.el-input {
+    .el-input__inner {
+      font-size: 12px;
+      height: 33px;
+      line-height: 33px;
+    }
+  }
 }
 </style>
