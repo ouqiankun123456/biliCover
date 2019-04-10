@@ -248,7 +248,7 @@ export default {
         if (!that.chosenType.data[key].defaultValue) {
           return
         }
-        that.$http.delete({ url: that.$http.baseUrl + '/io',
+        that.$http.delete({ url: '/io',
           params: {
             delKids: that.chosenType.data[key].defaultValue
           }
@@ -403,7 +403,7 @@ export default {
       console.log(this.handleResultLayersObj(this.layers))
       let submitObj = this.handleResultLayersObj(this.layers)
       this.$http
-        .post({ url: this.$http.baseUrl + '/cover', data: submitObj })
+        .post({ url: '/cover', params: submitObj })
         .then(response => {
           console.log(response)
         })
@@ -414,10 +414,10 @@ export default {
     setPreview() {
       let that = this
       this.$http
-        .put({ url: that.$http.baseUrl + '/cover/previewImage', data: { previewImage: this.previewImageUrl } })
+        .put({ url: '/cover/previewImage', params: { previewImage: this.previewImageUrl } })
         .then(response => {
           console.log(response)
-          that.nowImgSrc = that.$http.baseUrl + response.data.result
+          that.nowImgSrc = that.$http.baseUrl + response
           // that.$set(that, 'showImgSrc', 'proxyUrl' + response.data.result)
         })
         .catch(function(error) {
@@ -428,10 +428,11 @@ export default {
       let submitObj = this.handlePreviewLayersObj(this.layers)
       let that = this
       this.$http
-        .post({ url: that.$http.baseUrl + '/cover/preview', data: { templateCode: submitObj.templateCode } })
+        .post({ url: '/cover/preview', params: { templateCode: submitObj.templateCode } })
         .then(response => {
-          that.previewImageUrl = response.data.result
-          that.showImgSrc = 'proxyUrl/temp/预览.png'
+          console.log(response)
+          that.previewImageUrl = response
+          that.showImgSrc = that.$http.baseUrl + '/temp/预览.png'
           // that.showImgSrc = 'proxyUrl' + response.data.result
         })
         .catch(function(error) {
@@ -520,7 +521,7 @@ export default {
     display: flex;
     &__left {
       box-sizing: border-box;
-      width: 100px;
+      width: 150px;
       height: 100%;
       padding-top: 20px;
       background-color: #F5F5F5;
