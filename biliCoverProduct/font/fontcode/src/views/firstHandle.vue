@@ -90,7 +90,7 @@
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="uploadImg">确 定</el-button>
+        <el-button type="primary" @click="handleUpload">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -99,7 +99,8 @@
 <script>
 import { mapState, mapGetters } from 'vuex'
 import { VueCropper } from 'vue-cropper'
-import { blobToDataUrl } from '@/assets/js/utils'
+import { blobToDataUrl, dataURLtoFile } from '@/assets/js/utils'
+import { uploadFile } from '@/api/api'
 export default {
   components: {
     VueCropper
@@ -193,28 +194,17 @@ export default {
     prevStep () {
       this.$router.go(-1)
     },
-    dataURLtoFile(dataurl, filename) { // 将base64转换为文件
-      var arr = dataurl.split(','); var mime = arr[0].match(/:(.*?);/)[1]
-      var bstr = atob(arr[1]); var n = bstr.length; var u8arr = new Uint8Array(n)
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n)
-      }
-      var reg = /.+\/(.+)$/
-      let mimeArr = mime.match(reg)
-      return new File([u8arr], filename + '.' + mimeArr[1], { type: mime })
-    },
-    uploadImg () {
-      let formData = new FormData()
-      formData.append('file', this.file)
-      formData.append('uploadPath', 'temp')
-      this.$axios.post('proxyUrl/io/chunkUpload', formData).then(res => {
+    uploadImg (params) {
+      return this.$http.post({
+        url: 'io/chunkUpload'
+        // params: formData
+      }).then(res => {
         console.log('uploadimg', res)
         let data = {
           templateKid: this.cropperFormData.templateKid,
           data: {
             ...this.cropperFormData.data,
-            // '图片1': encodeURI(res.data.result)
-            '图片1': res.data.result
+            '图片1': res
           },
           printSize: this.cropperFormData.printSize
         }
@@ -235,6 +225,13 @@ export default {
         })
       })
     },
+    async handleUpload () {
+      let formData = new FormData()
+      formData.append('file', this.file)
+      formData.append('uploadPath', 'temp')
+      let a = await uploadFile(formData)
+      console.log(a)
+    },
     handleClose () {
 
     },
@@ -243,9 +240,8 @@ export default {
     },
     realTime (data) {
       this.$refs.cropper.getCropBlob((data1) => {
-        // do something
-        this.blobToDataURL(data1, base64 => {
-          this.file = this.dataURLtoFile(base64, '上传')
+        blobToDataUrl(data1, base64 => {
+          this.file = dataURLtoFile(base64, '上传')
           console.log(this.file)
         })
       })
