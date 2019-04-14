@@ -3,7 +3,7 @@
     <div class="editor">
       <div class="editor-preview">
         <div class="editor-preview__title">
-          <h1>已选模板：国服最强狄仁杰</h1>
+          <h1>已选模板：{{ this.templateName }}</h1>
           <h4>上传自己的图片素材，在建议区域进行构图或许效果更好哦~</h4>
         </div>
         <div class="editor-preview__img">
@@ -16,13 +16,25 @@
           <p class="editor-edit__tips">如有需要可在下方调整图片色调</p>
         </div>
         <div>
-          <el-collapse v-model="activeNames" @change="handleChange">
+          <el-collapse v-model="activeNames" @change="handleChange" class="el-collapse-root">
             <el-collapse-item name="1">
               <template slot="title">
                 <span class="editor-collapse__title">基础调整</span>
               </template>
+              <div class="editor-collapse-item">
+                <span>对比度</span>
+                <span>{{ contrast }}</span>
+              </div>
               <el-slider v-model="contrast"></el-slider>
+              <div class="editor-collapse-item">
+                <span>亮度</span>
+                <span>{{ brightness }}</span>
+              </div>
               <el-slider v-model="brightness"></el-slider>
+              <div class="editor-collapse-item">
+                <span>饱和度</span>
+                <span>{{ saturation }}</span>
+              </div>
               <el-slider v-model="saturation"></el-slider>
             </el-collapse-item>
             <el-collapse-item name="2">
@@ -41,7 +53,7 @@
     <div class="tabbar">
       <p class="tabbar-title">选择制定图片进行编辑</p>
       <div class="tabbar-tab">
-        <div class="tabbar-tab__item" v-for="(tabItem, index) of tabData" :key="index">
+        <div class="tabbar-tab__item" :class="{ currentTab: index === activeIndex }" v-for="(tabItem, index) of tabData" :key="index" @click="handleTabClick(tabItem, index)">
           <div></div>
           <div>{{ tabItem.paramName }}</div>
         </div>
@@ -100,13 +112,16 @@
 import { mapState, mapGetters } from 'vuex'
 import { VueCropper } from 'vue-cropper'
 import { blobToDataUrl, dataURLtoFile } from '@/assets/js/utils'
-import { uploadFile } from '@/api/api'
+import { uploadFile, generateCover } from '@/api/api'
 export default {
   components: {
     VueCropper
   },
+  props: ['templateKid', 'templateName'],
   data() {
     return {
+      activeIndex: -1,
+      currentTab: null,
       file: '',
       previewSrc: '',
       option: {
@@ -143,14 +158,18 @@ export default {
     ]),
     filterObject () {
       return {
-        filter: `brightness(${this.brightness / 50}) 
-          contrast(${this.contrast / 50}) 
+        filter: `brightness(${this.brightness / 50})
+          contrast(${this.contrast / 50})
           saturate(${this.saturation / 50})
         `
       }
     }
   },
   methods: {
+    handleTabClick(tab, index) {
+      this.activeIndex = index
+      this.currentTab = tab
+    },
     download() {
       // const maxWidth = 1080
       // const maxHeight = 960
@@ -172,8 +191,8 @@ export default {
       canvas.width = naturalWidth
       canvas.height = naturalHeight
       const ctx = canvas.getContext('2d')
-      const filterStr = `brightness(${this.brightness / 100}) 
-        contrast(${this.contrast / 100}) 
+      const filterStr = `brightness(${this.brightness / 100})
+        contrast(${this.contrast / 100})
         saturate(${this.saturation / 100})
       `
       ctx.filter = filterStr.trim()
@@ -226,11 +245,21 @@ export default {
       })
     },
     async handleUpload () {
+      // 上传图片
       let formData = new FormData()
       formData.append('file', this.file)
       formData.append('uploadPath', 'temp')
       let a = await uploadFile(formData)
-      console.log(a)
+      // 生成封面
+      let formData1 = {
+        templateKid: this.templateKid,
+        printSize: 'bilibili',
+        ...this.cropperFormData,
+        [this.currentTab.paramName]: a
+      }
+      console.log(formData1)
+      let b = await generateCover(formData1)
+      console.log(b)
     },
     handleClose () {
 
@@ -303,6 +332,16 @@ export default {
       width: 340px;
       margin-top: 56px;
       font-size: 24px;
+      .el-collapse-root {
+        /deep/ .el-collapse-item__wrap,
+        /deep/ .el-collapse-item__header {
+          background-color: #f5f5f5;
+        }
+
+        /deep/ .el-collapse-item__header {
+          padding: 23px 0;
+        }
+      }
       .btn-default {
         width: 100%;
         margin-top: 10px;
@@ -332,6 +371,15 @@ export default {
     }
 
     &-collapse {
+      &-item {
+        line-height: 32px;
+        font-size: 24px;
+        display: flex;
+        justify-content: space-between;
+        span {
+          color: #666666;
+        }
+      }
       &__title {
         font-size:36px;
         font-weight:bold;
@@ -360,7 +408,8 @@ export default {
       font-size:12px;
       color: #003333;
       text-indent: 1em;
-      margin: 0;
+      margin-top: 10px;
+      margin-bottom: 0;
     }
     &-tab {
       height: 90px;
@@ -384,7 +433,15 @@ export default {
           line-height: 16px;
         }
       }
+      .currentTab {
+        div {
+          color: red;
+          border: 1px solid red;
+        }
+      }
     }
   }
+
 }
+
 </style>

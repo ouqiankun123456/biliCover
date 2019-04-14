@@ -40,7 +40,7 @@ export function downloadFile (params) {
  * @returns
  */
 export function uploadFile (params) {
-  return this.$http.post({
+  return http.post({
     url: 'io/chunkUpload',
     params: params
   })

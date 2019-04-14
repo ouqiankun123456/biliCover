@@ -49,8 +49,9 @@ export default new Router({
       component: () => import(/* webpackChunkName: "makeCover" */ './views/makeCover.vue'),
       children: [
         {
-          path: 'firstHandle',
+          path: 'firstHandle/:templateKid',
           name: 'firstHandle',
+          props: true,
           component: () => import(/* webpackChunkName: "firstHandle" */ './views/firstHandle.vue')
         },
         {

@@ -51,7 +51,14 @@ export default {
       this.$router.go(-1)
     },
     nextStep () {
-      this.$router.push('/makeCover/firstHandle')
+      // this.$router.push('/makeCover/firstHandle')
+      this.$router.push({
+        name: 'firstHandle',
+        params: {
+          templateName: this.templateName,
+          templateKid: this.templateKid
+        }
+      })
     },
     async bootstrap () {
       // 获取表单
