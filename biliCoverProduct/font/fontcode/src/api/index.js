@@ -18,14 +18,12 @@ function getBaseUrl() {
 
 /**
  * 封装axios的接口处理函数, RESTful风格
- * @param {String} method
- * @param {String} url
- * @param {Object|Array} params 请求参数
+ * @param {Object} axios config object
  * @param {Boolean} saySuccess 是否调用提示
  * @param {Boolean} [filterN=true] 过滤参数中有null的值
  * @returns {Promise}
  */
-function apiAxios(method, url, params, saySuccess, filterN = true) {
+function apiAxios({ method, url, params, responseType = 'json' }, saySuccess, filterN = true) {
   if (params && filterN) {
     params = filterNull(params)
   }
@@ -34,14 +32,20 @@ function apiAxios(method, url, params, saySuccess, filterN = true) {
     url: encodeURI(url),
     data: method === 'POST' || method === 'PUT' ? params : null,
     params: method === 'GET' || method === 'DELETE' ? params : null,
-    baseURL: getBaseUrl()
+    baseURL: getBaseUrl(),
+    responseType: responseType
   }).then(function (res) {
+    console.log(res)
     if (res.data.code === 200) {
       if (res.data.message && saySuccess) {
         // vm.$weui.toast(res.data.message)
       }
       return res.data.result
-    } else {
+    }
+    else if (res.data instanceof Blob) {
+      return res.data
+    } 
+    else {
       if (res.data.message) {
         // vm.$weui.topTips(res.data.message)
       }
@@ -57,28 +61,48 @@ function apiAxios(method, url, params, saySuccess, filterN = true) {
 // 返回在vue模板中的调用接口
 export default {
   baseUrl: getBaseUrl(),
-  get ({ url, params, saySuccess = true, filterNull }) {
+  get ({ url, params, saySuccess = true, filterNull, responseType }) {
     if (params instanceof Array && params.length > 0) {
       for (let param of params) {
         url = url + '/' + param
       }
       params = null
     }
-    return apiAxios('GET', url, params, saySuccess, filterNull)
+    return apiAxios({
+      method: 'GET', 
+      url: url, 
+      params: params,
+      responseType: responseType
+    }, saySuccess, filterNull)
   },
-  post ({ url, params, saySuccess = true, filterNull }) {
-    return apiAxios('POST', url, params, saySuccess, filterNull)
+  post ({ url, params, saySuccess = true, filterNull, responseType }) {
+    return apiAxios({
+      method: 'POST', 
+      url: url, 
+      params: params,
+      responseType: responseType
+    }, saySuccess, filterNull)
   },
-  put ({ url, params, saySuccess = true, filterNull }) {
-    return apiAxios('PUT', url, params, saySuccess, filterNull)
+  put ({ url, params, saySuccess = true, filterNull, responseType }) {
+    return apiAxios({
+      method: 'PUT',
+      url: url,
+      params: params,
+      responseType: responseType
+    }, saySuccess, filterNull)
   },
-  delete ({ url, params, saySuccess = true, filterNull }) {
+  delete ({ url, params, saySuccess = true, filterNull, responseType }) {
     if (params instanceof Array && params.length > 0) {
       for (let param of params) {
         url = url + '/' + param
       }
       params = null
     }
-    return apiAxios('DELETE', url, params, saySuccess, filterNull)
+    return apiAxios({
+      method: 'DELETE',
+      url: url,
+      params: params,
+      responseType: responseType
+    }, saySuccess, filterNull)
   }
 }

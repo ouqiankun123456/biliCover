@@ -66,7 +66,7 @@
       class="upload-dialog"
       title="提示"
       :visible.sync="dialogVisible"
-      :before-close="handleClose">
+      :before-close="beforeClose">
       <div>
         <el-upload
           :auto-upload="false"
@@ -112,7 +112,7 @@
 import { mapState, mapGetters } from 'vuex'
 import { VueCropper } from 'vue-cropper'
 import { blobToDataUrl, dataURLtoFile } from '@/assets/js/utils'
-import { uploadFile, generateCover } from '@/api/api'
+import { uploadFile, generateCover, downloadFile } from '@/api/api'
 export default {
   components: {
     VueCropper
@@ -120,6 +120,8 @@ export default {
   props: ['templateKid', 'templateName'],
   data() {
     return {
+      tabLen: -1,
+      coverFormData: {},
       activeIndex: -1,
       currentTab: null,
       file: '',
@@ -171,6 +173,10 @@ export default {
       this.currentTab = tab
     },
     download() {
+      if (this.tabLen > 0) {
+        this.$message.warning('你还有图片未上传编辑，不能保存！')
+        return
+      }
       // const maxWidth = 1080
       // const maxHeight = 960
       // let targetWidth = 0
@@ -208,41 +214,19 @@ export default {
       })
     },
     uploadImage () {
-      this.dialogVisible = true
+      if (this.activeIndex >= 0) {
+        this.dialogVisible = true
+      } else {
+        this.$message.error('请选择要编辑的图片上传！')
+      }
     },
     prevStep () {
       this.$router.go(-1)
     },
-    uploadImg (params) {
-      return this.$http.post({
-        url: 'io/chunkUpload'
-        // params: formData
-      }).then(res => {
-        console.log('uploadimg', res)
-        let data = {
-          templateKid: this.cropperFormData.templateKid,
-          data: {
-            ...this.cropperFormData.data,
-            '图片1': res
-          },
-          printSize: this.cropperFormData.printSize
-        }
-        this.$axios.post('proxyUrl/coverGenerator', data).then(res => {
-          this.$axios.get('proxyUrl/io/download', {
-            responseType: 'blob',
-            params: {
-              name: res.data.result,
-              type: 'temp'
-            }
-          }).then(res => {
-            let blob = new Blob([res.data], { type: `${res.data.type}` })
-            this.previewSrc = URL.createObjectURL(blob)
-            // this.setPreviewImage(this.coverImageSrc)
-          })
-          // this.previewSrc = 'http://238o4s4873.zicp.vip:57014/temp/' + res.data.result
-          this.dialogVisible = false
-        })
-      })
+    beforeClose (done) {
+      console.log('close')
+      
+      done()
     },
     async handleUpload () {
       // 上传图片
@@ -254,15 +238,25 @@ export default {
       let formData1 = {
         templateKid: this.templateKid,
         printSize: 'bilibili',
-        ...this.cropperFormData,
-        [this.currentTab.paramName]: a
+        data: {
+          ...this.coverFormData,
+          [this.currentTab.paramName]: a
+        }
       }
-      console.log(formData1)
       let b = await generateCover(formData1)
-      console.log(b)
-    },
-    handleClose () {
-
+      // 下载回来显示，因为直接显示b会有canvas跨域问题
+      let c = await downloadFile({ 
+        name: b, 
+        type: 'temp'
+      }, { responseType: 'blob' })
+      console.log(c)
+      let blob = new Blob([c], { type: `${c.type}` })
+      this.previewSrc = URL.createObjectURL(blob)
+      this.coverFormData = Object.assign({}, formData1.data)
+      this.dialogVisible = false
+      this.file = '',
+      this.option.img = ''
+      this.tabLen--
     },
     handleChange () {
 
@@ -283,6 +277,8 @@ export default {
   },
   created () {
     this.previewSrc = this.previewImage
+    this.coverFormData = this.cropperFormData
+    this.tabLen = this.tabData.length
   }
 }
 </script>

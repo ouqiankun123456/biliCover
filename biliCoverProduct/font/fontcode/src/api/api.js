@@ -24,10 +24,11 @@ export function generateCover (params) {
  * @param {Object} params
  * @returns
  */
-export function downloadFile (params) {
+export function downloadFile (params, axiosConfig) {
   return http.get({
     url: 'io/download',
-    params: params
+    params: params,
+    ...axiosConfig
   })
 }
 
