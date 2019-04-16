@@ -12,8 +12,12 @@ function getBaseUrl() {
   if (process.env.NODE_ENV === 'development') {
     return 'proxyUrl'
   } else {
-    return location.host + '/back'
+    return 'https://www.cocover.cn/'
   }
+}
+
+function getRealBaseUrl() {
+  return location.host
 }
 
 /**
@@ -60,6 +64,7 @@ function apiAxios({ method, url, params, responseType = 'json' }, saySuccess, fi
 
 // 返回在vue模板中的调用接口
 export default {
+  realBaseUrl: getRealBaseUrl(),
   baseUrl: getBaseUrl(),
   get ({ url, params, saySuccess = true, filterNull, responseType }) {
     if (params instanceof Array && params.length > 0) {
