@@ -225,7 +225,7 @@ export default {
     },
     beforeClose (done) {
       console.log('close')
-      
+
       done()
     },
     async handleUpload () {
@@ -245,8 +245,8 @@ export default {
       }
       let b = await generateCover(formData1)
       // 下载回来显示，因为直接显示b会有canvas跨域问题
-      let c = await downloadFile({ 
-        name: b, 
+      let c = await downloadFile({
+        name: b,
         type: 'temp'
       }, { responseType: 'blob' })
       console.log(c)
@@ -254,7 +254,7 @@ export default {
       this.previewSrc = URL.createObjectURL(blob)
       this.coverFormData = Object.assign({}, formData1.data)
       this.dialogVisible = false
-      this.file = '',
+      this.file = ''
       this.option.img = ''
       this.tabLen--
     },

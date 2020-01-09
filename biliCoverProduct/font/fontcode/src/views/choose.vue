@@ -12,6 +12,9 @@
         :type="item.templateType"
       ></img-view>
     </div>
+    <div class="footer">
+      <a href="http://www.beian.miit.gov.cn" target="_blank">©2020 BiliCover 粤ICP备19032327号</a>
+    </div>
   </div>
 </template>
 
@@ -85,6 +88,17 @@ export default {
     grid-column-gap: 15px;
     grid-row-gap: 60px;
     justify-items: stretch;
+  }
+  .footer {
+    text-align: center;
+    padding: 16px 0;
+    margin-top: 60px;
+    margin-bottom: 20px;
+
+    a {
+      text-decoration: none;
+      color: black;
+    }
   }
 }
 </style>

@@ -45,11 +45,9 @@ function apiAxios({ method, url, params, responseType = 'json' }, saySuccess, fi
         // vm.$weui.toast(res.data.message)
       }
       return res.data.result
-    }
-    else if (res.data instanceof Blob) {
+    } else if (res.data instanceof Blob) {
       return res.data
-    } 
-    else {
+    } else {
       if (res.data.message) {
         // vm.$weui.topTips(res.data.message)
       }
@@ -74,16 +72,16 @@ export default {
       params = null
     }
     return apiAxios({
-      method: 'GET', 
-      url: url, 
+      method: 'GET',
+      url: url,
       params: params,
       responseType: responseType
     }, saySuccess, filterNull)
   },
   post ({ url, params, saySuccess = true, filterNull, responseType }) {
     return apiAxios({
-      method: 'POST', 
-      url: url, 
+      method: 'POST',
+      url: url,
       params: params,
       responseType: responseType
     }, saySuccess, filterNull)

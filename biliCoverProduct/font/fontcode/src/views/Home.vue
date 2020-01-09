@@ -29,6 +29,9 @@
         </div>
       </div>
     </div>
+    <div class="footer">
+      <a href="http://www.beian.miit.gov.cn" target="_blank">©2020 BiliCover 粤ICP备19032327号</a>
+    </div>
   </div>
 </template>
 
@@ -170,6 +173,16 @@ export default {
     font-size: 24px;
     margin-top: 40px;
     border: none;
+  }
+  .footer {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    transform: translateX(-50%);
+    a {
+      text-decoration: none;
+      color: #fff;
+    }
   }
 }
 </style>
